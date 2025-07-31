@@ -58,78 +58,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render the data
-    function render(teams) {
+    function render(tasks) {
         app.innerHTML = '';
-        const row = document.createElement('div');
-        row.className = 'row';
 
-        for (const teamName in teams) {
-            const tasks = teams[teamName];
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'table-responsive';
+
+        const table = document.createElement('table');
+        table.className = 'table table-striped table-hover mb-0';
+
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>메인팀</th>
+                <th>작업팀</th>
+                <th>담당자</th>
+                <th>메인업무</th>
+                <th>상세업무</th>
+                <th>상태</th>
+                <th>날짜/시간</th>
+                <th>메모</th>
+                <th>자료실</th>
+            </tr>
+        `;
+
+        const tbody = document.createElement('tbody');
+        tasks.forEach(task => {
+            const tr = document.createElement('tr');
             
-            const col = document.createElement('div');
-            col.className = 'col-12 mb-4';
+            const statusColor = statusColors[task['상태']] || 'secondary';
 
-            const card = document.createElement('div');
-            card.className = 'card';
-
-            const cardHeader = document.createElement('div');
-            cardHeader.className = 'card-header fw-bold fs-5';
-            cardHeader.textContent = teamName;
-
-            const cardBody = document.createElement('div');
-            cardBody.className = 'card-body p-0'; // Remove padding to make table fit nicely
-
-            const tableContainer = document.createElement('div');
-            tableContainer.className = 'table-responsive';
-
-            const table = document.createElement('table');
-            table.className = 'table table-striped table-hover mb-0';
-
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>메인팀</th>
-                    <th>작업팀</th>
-                    <th>담당자</th>
-                    <th>메인업무</th>
-                    <th>상세업무</th>
-                    <th>상태</th>
-                    <th>날짜/시간</th>
-                    <th>메모</th>
-                    <th>자료실</th>
-                </tr>
+            tr.innerHTML = `
+                <td>${task['메인팀']}</td>
+                <td>${task['작업팀']}</td>
+                <td>${task['담당자']}</td>
+                <td>${task['메인업무']}</td>
+                <td>${task['상세업무']}</td>
+                <td><span class="badge bg-${statusColor}" onclick="changeStatus(this)">${task['상태']}</span></td>
+                <td>${task['날짜']} ${task['시간']}</td>
+                <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
+                <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
             `;
+            tbody.appendChild(tr);
+        });
 
-            const tbody = document.createElement('tbody');
-            tasks.forEach(task => {
-                const tr = document.createElement('tr');
-                
-                const statusColor = statusColors[task['상태']] || 'secondary';
-
-                tr.innerHTML = `
-                    <td>${task['메인팀']}</td>
-                    <td>${task['작업팀']}</td>
-                    <td>${task['담당자']}</td>
-                    <td>${task['메인업무']}</td>
-                    <td>${task['상세업무']}</td>
-                    <td><span class="badge bg-${statusColor}" onclick="changeStatus(this)">${task['상태']}</span></td>
-                    <td>${task['날짜']} ${task['시간']}</td>
-                    <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
-                    <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            table.appendChild(thead);
-            table.appendChild(tbody);
-            tableContainer.appendChild(table);
-            cardBody.appendChild(tableContainer);
-            card.appendChild(cardHeader);
-            card.appendChild(cardBody);
-            col.appendChild(card);
-            row.appendChild(col);
-        }
-        app.appendChild(row);
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        tableContainer.appendChild(table);
+        app.appendChild(tableContainer);
     }
 
     window.addMemo = addMemo;
@@ -183,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const groupedTasks = groupTasksByTeam(filteredTasks);
-        render(groupedTasks);
+        render(filteredTasks);
     }
 
     // Fetch data and render the page
