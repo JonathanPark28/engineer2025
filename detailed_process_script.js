@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusOrder = ['대기', '진행중', '완료', '보류', '문제'];
 
     // Placeholder for your Google Apps Script Web App URL
-    const GAS_WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw0t1PkJlzxMc8_8OLFJCs4PKN_karmorNTaVujWqYPPGIdObxvAw4I6ui_2KyrGGB5/exec'; 
 
     async function updateGoogleSheet(rowIndex, column, value) {
         try {
