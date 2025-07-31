@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allTasks = []; // Store all tasks globally
 
-    // Function to create and populate filter dropdowns
+    // Function to create and populate filter buttons
     function createFilters(tasks) {
         const mainTeams = [...new Set(tasks.map(task => task['메인팀']))];
         const workTeams = [...new Set(tasks.map(task => task['작업팀']))];
@@ -132,32 +132,45 @@ document.addEventListener('DOMContentLoaded', () => {
         filterContainer.className = 'mb-3';
 
         filterContainer.innerHTML = `
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <select id="mainTeamFilter" class="form-select form-select-sm">
-                        <option value="">모든 메인팀</option>
-                        ${mainTeams.map(team => `<option value="${team}">${team}</option>`).join('')}
-                    </select>
+            <div class="mb-2">
+                <strong>메인팀:</strong>
+                <div class="btn-group" role="group" id="mainTeamFilter">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" data-filter-value="">모두</button>
+                    ${mainTeams.map(team => `<button type="button" class="btn btn-outline-primary btn-sm" data-filter-value="${team}">${team}</button>`).join('')}
                 </div>
-                <div class="col-md-6">
-                    <select id="workTeamFilter" class="form-select form-select-sm">
-                        <option value="">모든 작업팀</option>
-                        ${workTeams.map(team => `<option value="${team}">${team}</option>`).join('')}
-                    </select>
+            </div>
+            <div class="mb-2">
+                <strong>작업팀:</strong>
+                <div class="btn-group" role="group" id="workTeamFilter">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" data-filter-value="">모두</button>
+                    ${workTeams.map(team => `<button type="button" class="btn btn-outline-primary btn-sm" data-filter-value="${team}">${team}</button>`).join('')}
                 </div>
             </div>
         `;
 
         document.getElementById('filter-wrapper').appendChild(filterContainer);
 
-        document.getElementById('mainTeamFilter').addEventListener('change', applyFilters);
-        document.getElementById('workTeamFilter').addEventListener('change', applyFilters);
+        document.querySelectorAll('#mainTeamFilter .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('#mainTeamFilter .btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
+
+        document.querySelectorAll('#workTeamFilter .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('#workTeamFilter .btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
     }
 
     // Function to apply filters and re-render
     function applyFilters() {
-        const selectedMainTeam = document.getElementById('mainTeamFilter').value;
-        const selectedWorkTeam = document.getElementById('workTeamFilter').value;
+        const selectedMainTeam = document.querySelector('#mainTeamFilter .btn.active').dataset.filterValue;
+        const selectedWorkTeam = document.querySelector('#workTeamFilter .btn.active').dataset.filterValue;
 
         let filteredTasks = allTasks;
 
@@ -168,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredTasks = filteredTasks.filter(task => task['작업팀'] === selectedWorkTeam);
         }
 
-        const groupedTasks = groupTasksByTeam(filteredTasks);
         render(filteredTasks);
     }
 
