@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
+
+    // Create containers for filters and table
+    const filterWrapper = document.createElement('div');
+    filterWrapper.id = 'filter-wrapper';
+    app.appendChild(filterWrapper);
+
+    const tableWrapper = document.createElement('div');
+    tableWrapper.id = 'table-wrapper';
+    app.appendChild(tableWrapper);
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSutWVZQUCnCrOxgWT7iPR_0imz1-L_KpfRhUwJmMEgK02nbQbLBUfS43hca8sPYMuM2obtlvrYSR-o/pub?gid=0&single=true&output=csv';
 
     const statusColors = {
@@ -59,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render the data
     function render(tasks) {
-        app.innerHTML = '';
+        const tableWrapper = document.getElementById('table-wrapper');
+        tableWrapper.innerHTML = ''; // Clear previous table content
 
         const tableContainer = document.createElement('div');
         tableContainer.className = 'table-responsive';
@@ -105,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         table.appendChild(thead);
         table.appendChild(tbody);
         tableContainer.appendChild(table);
-        app.appendChild(tableContainer);
+        tableWrapper.appendChild(tableContainer);
     }
 
     window.addMemo = addMemo;
@@ -138,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        app.prepend(filterContainer);
+        document.getElementById('filter-wrapper').appendChild(filterContainer);
 
         document.getElementById('mainTeamFilter').addEventListener('change', applyFilters);
         document.getElementById('workTeamFilter').addEventListener('change', applyFilters);
