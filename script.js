@@ -135,6 +135,57 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addMemo = addMemo;
     window.changeStatus = changeStatus;
 
+    let allTasks = []; // Store all tasks globally
+
+    // Function to create and populate filter dropdowns
+    function createFilters(tasks) {
+        const mainTeams = [...new Set(tasks.map(task => task['메인팀']))];
+        const workTeams = [...new Set(tasks.map(task => task['작업팀']))];
+
+        const filterContainer = document.createElement('div');
+        filterContainer.className = 'mb-3';
+
+        filterContainer.innerHTML = `
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <select id="mainTeamFilter" class="form-select form-select-sm">
+                        <option value="">모든 메인팀</option>
+                        ${mainTeams.map(team => `<option value="${team}">${team}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <select id="workTeamFilter" class="form-select form-select-sm">
+                        <option value="">모든 작업팀</option>
+                        ${workTeams.map(team => `<option value="${team}">${team}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+        `;
+
+        app.prepend(filterContainer);
+
+        document.getElementById('mainTeamFilter').addEventListener('change', applyFilters);
+        document.getElementById('workTeamFilter').addEventListener('change', applyFilters);
+    }
+
+    // Function to apply filters and re-render
+    function applyFilters() {
+        const selectedMainTeam = document.getElementById('mainTeamFilter').value;
+        const selectedWorkTeam = document.getElementById('workTeamFilter').value;
+
+        let filteredTasks = allTasks;
+
+        if (selectedMainTeam) {
+            filteredTasks = filteredTasks.filter(task => task['메인팀'] === selectedMainTeam);
+        }
+        if (selectedWorkTeam) {
+            filteredTasks = filteredTasks.filter(task => task['작업팀'] === selectedWorkTeam);
+        }
+
+        const groupedTasks = groupTasksByTeam(filteredTasks);
+        render(groupedTasks);
+    }
+
     // Fetch data and render the page
     fetch(csvUrl)
         .then(response => {
@@ -144,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.text();
         })
         .then(csvText => {
-            const tasks = parseCSV(csvText);
-            const groupedTasks = groupTasksByTeam(tasks);
-            render(groupedTasks);
+            allTasks = parseCSV(csvText); // Store all tasks
+            createFilters(allTasks); // Create filters based on all tasks
+            applyFilters(); // Apply initial filters (none selected) and render
         })
         .catch(error => {
             console.error('Error fetching or parsing data:', error);
