@@ -37,6 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
     }
 
+    function addMemo(button) {
+        const newMemo = prompt("메모를 입력하세요:");
+        if (newMemo) {
+            const td = button.parentElement;
+            td.textContent = newMemo;
+        }
+    }
+
     // Render the data
     function render(teams) {
         app.innerHTML = '';
@@ -69,12 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
             thead.innerHTML = `
                 <tr>
                     <th>작업팀</th>
+                    <th>담당자</th>
                     <th>메인업무</th>
                     <th>상세업무</th>
                     <th>상태</th>
                     <th>날짜/시간</th>
                     <th>메모</th>
-                    <th>링크</th>
+                    <th>자료실</th>
                 </tr>
             `;
 
@@ -86,12 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 tr.innerHTML = `
                     <td>${task['작업팀']}</td>
+                    <td>${task['담당자']}</td>
                     <td>${task['메인업무']}</td>
                     <td>${task['상세업무']}</td>
                     <td><span class="badge bg-${statusColor}">${task['상태']}</span></td>
                     <td>${task['날짜']} ${task['시간']}</td>
-                    <td>${task['메모']}</td>
-                    <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">보기</a>` : ''}</td>
+                    <td><button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
+                    <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -107,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         app.appendChild(row);
     }
+
+    window.addMemo = addMemo;
 
     // Fetch data and render the page
     fetch(csvUrl)
