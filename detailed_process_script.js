@@ -232,4 +232,3 @@ document.addEventListener('DOMContentLoaded', () => {
             app.innerHTML = '<div class="alert alert-danger">데이터를 불러오는 데 실패했습니다. 구글 시트가 "웹에 게시" 되었는지, 링크가 올바른지 확인해주세요.</div>';
         });
 });
-});
