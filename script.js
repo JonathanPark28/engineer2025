@@ -37,6 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
     }
 
+    function changeStatus(select) {
+        const newStatus = select.value;
+        const td = select.parentElement;
+        // You might want to update the underlying data and re-render, 
+        // but for now, we'll just change the display.
+        console.log(`Status changed to: ${newStatus}`);
+    }
+
     function addMemo(button) {
         const newMemo = prompt("메모를 입력하세요:");
         if (newMemo) {
@@ -76,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
+                    <th>메인팀</th>
                     <th>작업팀</th>
                     <th>담당자</th>
                     <th>메인업무</th>
@@ -94,13 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const statusColor = statusColors[task['상태']] || 'secondary';
 
                 tr.innerHTML = `
+                    <td>${task['메인팀']}</td>
                     <td>${task['작업팀']}</td>
                     <td>${task['담당자']}</td>
                     <td>${task['메인업무']}</td>
                     <td>${task['상세업무']}</td>
-                    <td><span class="badge bg-${statusColor}">${task['상태']}</span></td>
+                    <td>
+                        <select class="form-select form-select-sm" onchange="changeStatus(this)">
+                            <option value="대기" ${task['상태'] === '대기' ? 'selected' : ''}>대기</option>
+                            <option value="진행중" ${task['상태'] === '진행중' ? 'selected' : ''}>진행중</option>
+                            <option value="완료" ${task['상태'] === '완료' ? 'selected' : ''}>완료</option>
+                            <option value="보류" ${task['상태'] === '보류' ? 'selected' : ''}>보류</option>
+                            <option value="문제" ${task['상태'] === '문제' ? 'selected' : ''}>문제</option>
+                        </select>
+                    </td>
                     <td>${task['날짜']} ${task['시간']}</td>
-                    <td><button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
+                    <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
                     <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
                 `;
                 tbody.appendChild(tr);
@@ -119,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addMemo = addMemo;
+    window.changeStatus = changeStatus;
 
     // Fetch data and render the page
     fetch(csvUrl)
