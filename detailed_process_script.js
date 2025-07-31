@@ -23,12 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function parseCSV(text) {
         const lines = text.trim().split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
-        const rows = lines.slice(1).map(line => {
+        const rows = lines.slice(1).map((line, index) => {
             const values = line.split(',').map(v => v.trim());
             const row = {};
             headers.forEach((header, i) => {
                 row[header] = values[i] || '';
             });
+            row.rowIndex = index + 2; // +2 because CSV data starts from row 2 (after header)
             return row;
         });
         return rows;
@@ -48,7 +49,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const statusOrder = ['대기', '진행중', '완료', '보류', '문제'];
 
-    function changeStatus(element) {
+    // Placeholder for your Google Apps Script Web App URL
+    const GAS_WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
+
+    async function updateGoogleSheet(rowIndex, column, value) {
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Required for Apps Script web app
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: column === '상태' ? 'updateStatus' : 'addMemo',
+                    rowIndex: rowIndex,
+                    column: column,
+                    value: value
+                })
+            });
+            // Note: Due to 'no-cors', response.ok will always be true. 
+            // You'll need to check Apps Script logs for actual success/failure.
+            console.log(`Update request sent for row ${rowIndex}, column ${column}: ${value}`);
+        } catch (error) {
+            console.error('Error updating Google Sheet:', error);
+        }
+    }
+
+    function changeStatus(element, rowIndex) {
         let currentStatus = element.textContent.trim();
         let currentIndex = statusOrder.indexOf(currentStatus);
         let nextIndex = (currentIndex + 1) % statusOrder.length;
@@ -56,13 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         element.textContent = nextStatus;
         element.className = `badge bg-${statusColors[nextStatus]}`;
+
+        updateGoogleSheet(rowIndex, '상태', nextStatus);
     }
 
-    function addMemo(button) {
+    function addMemo(button, rowIndex) {
         const newMemo = prompt("메모를 입력하세요:");
         if (newMemo) {
             const td = button.parentElement;
             td.textContent = newMemo;
+            updateGoogleSheet(rowIndex, '메모', newMemo);
         }
     }
 
@@ -104,9 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${task['담당자']}</td>
                 <td>${task['메인업무']}</td>
                 <td>${task['상세업무']}</td>
-                <td><span class="badge bg-${statusColor}" onclick="changeStatus(this)">${task['상태']}</span></td>
+                <td><span class="badge bg-${statusColor}" onclick="changeStatus(this, ${task.rowIndex})">${task['상태']}</span></td>
                 <td>${task['날짜']} ${task['시간']}</td>
-                <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
+                <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this, ${task.rowIndex})">추가</button></td>
                 <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
             `;
             tbody.appendChild(tr);
@@ -201,4 +231,5 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching or parsing data:', error);
             app.innerHTML = '<div class="alert alert-danger">데이터를 불러오는 데 실패했습니다. 구글 시트가 "웹에 게시" 되었는지, 링크가 올바른지 확인해주세요.</div>';
         });
+});
 });
