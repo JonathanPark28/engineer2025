@@ -37,12 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
     }
 
-    function changeStatus(select) {
-        const newStatus = select.value;
-        const td = select.parentElement;
-        // You might want to update the underlying data and re-render, 
-        // but for now, we'll just change the display.
-        console.log(`Status changed to: ${newStatus}`);
+    const statusOrder = ['대기', '진행중', '완료', '보류', '문제'];
+
+    function changeStatus(element) {
+        let currentStatus = element.textContent.trim();
+        let currentIndex = statusOrder.indexOf(currentStatus);
+        let nextIndex = (currentIndex + 1) % statusOrder.length;
+        let nextStatus = statusOrder[nextIndex];
+
+        element.textContent = nextStatus;
+        element.className = `badge bg-${statusColors[nextStatus]}`;
     }
 
     function addMemo(button) {
@@ -108,15 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${task['담당자']}</td>
                     <td>${task['메인업무']}</td>
                     <td>${task['상세업무']}</td>
-                    <td>
-                        <select class="form-select form-select-sm" onchange="changeStatus(this)">
-                            <option value="대기" ${task['상태'] === '대기' ? 'selected' : ''}>대기</option>
-                            <option value="진행중" ${task['상태'] === '진행중' ? 'selected' : ''}>진행중</option>
-                            <option value="완료" ${task['상태'] === '완료' ? 'selected' : ''}>완료</option>
-                            <option value="보류" ${task['상태'] === '보류' ? 'selected' : ''}>보류</option>
-                            <option value="문제" ${task['상태'] === '문제' ? 'selected' : ''}>문제</option>
-                        </select>
-                    </td>
+                    <td><span class="badge bg-${statusColor}" onclick="changeStatus(this)">${task['상태']}</span></td>
                     <td>${task['날짜']} ${task['시간']}</td>
                     <td>${task['메모']} <button class="btn btn-sm btn-outline-secondary" onclick="addMemo(this)">추가</button></td>
                     <td>${task['링크'] ? `<a href="${task['링크']}" target="_blank">링크</a>` : ''}</td>
